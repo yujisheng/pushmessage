@@ -1,13 +1,13 @@
-package com.soft863.pushmessge;
+package com.soft863.pushmessge.util;
 
 /**
- * 更新前检查异常
+ * 推送消息异常
  */
 public class PushMessageException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     private String msg;
-    private int code = 1100;
+    private int code = 11000;
 
     public PushMessageException(String msg) {
         super(msg);

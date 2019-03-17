@@ -12,6 +12,7 @@ import cn.jpush.api.push.model.audience.Audience;
 import cn.jpush.api.push.model.notification.AndroidNotification;
 import cn.jpush.api.push.model.notification.IosNotification;
 import cn.jpush.api.push.model.notification.Notification;
+import com.soft863.pushmessge.config.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +110,7 @@ public class PushMessageMain {
             LOGGER.info("推送给设备标识参数的用户" + pushPayload);
             PushResult pushResult = jPushClient.sendPush(pushPayload);
             LOGGER.info("推送结果" + pushResult);
-            if (pushResult.getResponseCode() == 200) {
+            if (pushResult.getResponseCode() == HttpStatus.SUCCESS) {
                 result = 1;
             }
         } catch (APIConnectionException e) {
@@ -136,7 +137,7 @@ public class PushMessageMain {
             LOGGER.info("" + pushPayload);
             PushResult pushResult = jPushClient.sendPush(pushPayload);
             LOGGER.info("" + pushResult);
-            if (pushResult.getResponseCode() == 200) {
+            if (pushResult.getResponseCode() == HttpStatus.SUCCESS) {
                 result = 1;
             }
         } catch (Exception e) {
@@ -162,7 +163,7 @@ public class PushMessageMain {
             LOGGER.info("" + pushPayload);
             PushResult pushResult = jPushClient.sendPush(pushPayload);
             LOGGER.info("" + pushResult);
-            if (pushResult.getResponseCode() == 200) {
+            if (pushResult.getResponseCode() == HttpStatus.SUCCESS) {
                 result = 1;
             }
         } catch (APIConnectionException e) {
@@ -190,7 +191,7 @@ public class PushMessageMain {
             LOGGER.info("" + pushPayload);
             PushResult pushResult = jPushClient.sendPush(pushPayload);
             LOGGER.info("" + pushResult);
-            if (pushResult.getResponseCode() == 200) {
+            if (pushResult.getResponseCode() == HttpStatus.SUCCESS) {
                 result = 1;
             }
         } catch (Exception e) {
@@ -215,7 +216,7 @@ public class PushMessageMain {
             LOGGER.info("" + pushPayload);
             PushResult pushResult = jPushClient.sendPush(pushPayload);
             LOGGER.info("" + pushResult);
-            if (pushResult.getResponseCode() == 200) {
+            if (pushResult.getResponseCode() == HttpStatus.SUCCESS) {
                 result = 1;
             }
         } catch (Exception e) {
