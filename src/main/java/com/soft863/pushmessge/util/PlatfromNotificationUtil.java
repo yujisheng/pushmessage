@@ -8,6 +8,11 @@ import com.soft863.pushmessge.config.PushResult;
 
 /**
  * 推送平台通知消息体
+ *
+ * @ClassName PlatfromNotificationUtil
+ *
+ * @Author
+ * @Date 2019/3/18 0018
  */
 public class PlatfromNotificationUtil {
 

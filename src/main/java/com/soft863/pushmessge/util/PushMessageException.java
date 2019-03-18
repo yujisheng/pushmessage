@@ -2,6 +2,10 @@ package com.soft863.pushmessge.util;
 
 /**
  * 推送消息异常
+ *
+ * @ClassName PushMessageException
+ * @Author
+ * @Date 2019/3/18 0018
  */
 public class PushMessageException extends RuntimeException {
     private static final long serialVersionUID = 1L;

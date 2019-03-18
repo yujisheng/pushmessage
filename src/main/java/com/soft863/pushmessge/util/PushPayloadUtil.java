@@ -2,6 +2,7 @@ package com.soft863.pushmessge.util;
 
 import cn.jiguang.common.resp.APIConnectionException;
 import cn.jiguang.common.resp.APIRequestException;
+import cn.jiguang.common.utils.StringUtils;
 import cn.jpush.api.JPushClient;
 import cn.jpush.api.push.PushResult;
 import cn.jpush.api.push.model.Options;
@@ -11,8 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.util.resources.cldr.ff.LocaleNames_ff;
 
+import java.util.List;
+
 /**
  * 推送工具
+ *
+ * @ClassName PushPayloadUtil
+ * @Author
+ * @Date 2019/3/18 0018
  */
 public class PushPayloadUtil {
 
@@ -38,23 +45,74 @@ public class PushPayloadUtil {
         return optionsBuilder.build();
     }
 
-    public static int pushResult(JPushClient jPushClient, PushPayload pushPayload) {
+    /**
+     * 推送结果
+     * @param jPushClient
+     * @param pushPayload
+     * @param aliasOrTags 推送标识
+     * @param notificationTitle 推送通知的主题
+     * @param msgContent 推送消息内容
+     * @return
+     */
+    public static int pushResult(JPushClient jPushClient, PushPayload pushPayload , List<String> aliasOrTags,
+                                 String notificationTitle, String msgContent) {
+        if(!aliasOrTags.isEmpty() && StringUtils.isNotEmpty(msgContent) && StringUtils.isNotEmpty(notificationTitle)) {
+            // 消息推送
+            sendPushMessage(jPushClient,pushPayload);
+        }else {
+            ThrowException.aliasOrTagsException(aliasOrTags);
+            ThrowException.notificationTitleException(notificationTitle);
+            ThrowException.messageContentException(msgContent);
+        }
+        return com.soft863.pushmessge.config.PushResult.PUSH_FAILURE;
+    }
+
+
+    public static int pushResult(JPushClient jPushClient, PushPayload pushPayload,
+                                 String notificationTitle, String msgContent) {
+        if(StringUtils.isNotEmpty(msgContent) && StringUtils.isNotEmpty(notificationTitle)) {
+            sendPushMessage(jPushClient,pushPayload);
+        }else {
+            ThrowException.notificationTitleException(notificationTitle);
+            ThrowException.messageContentException(msgContent);
+        }
+        return com.soft863.pushmessge.config.PushResult.PUSH_FAILURE;
+    }
+
+    public static int pushResult(JPushClient jPushClient, PushPayload pushPayload, String msgContent) {
+        if(StringUtils.isNotEmpty(msgContent)) {
+            sendPushMessage(jPushClient,pushPayload);
+        }else {
+            ThrowException.messageContentException(msgContent);
+        }
+        return com.soft863.pushmessge.config.PushResult.PUSH_FAILURE;
+    }
+
+    /**
+     * 推送消息
+     * @param jPushClient
+     * @param pushPayload
+     * @return
+     */
+    private static int sendPushMessage(JPushClient jPushClient, PushPayload pushPayload){
+        LOGGER.info("===========sendPush==================");
         try {
             LOGGER.info("" + pushPayload);
             PushResult pushResult = jPushClient.sendPush(pushPayload);
             LOGGER.info("" + pushResult);
             if (pushResult.getResponseCode() == HttpStatus.SUCCESS) {
-                return com.soft863.pushmessge.config.PushResult.PUSH_FAILURE;
+                return com.soft863.pushmessge.config.PushResult.PUSH_SUCCESS;
             }
         } catch (APIConnectionException e) {
-            // 容错
             e.printStackTrace();
-
         } catch (APIRequestException e) {
             e.printStackTrace();
         } catch (Exception e) {
-            throw new PushMessageException("基础框架异常", 11001, e);
+            e.printStackTrace();
         }
-        return com.soft863.pushmessge.config.PushResult.PUSH_SUCCESS;
+        return com.soft863.pushmessge.config.PushResult.PUSH_FAILURE;
     }
+
+
+
 }

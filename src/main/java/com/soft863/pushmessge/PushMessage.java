@@ -3,6 +3,7 @@ package com.soft863.pushmessge;
 
 import cn.jiguang.common.resp.APIConnectionException;
 import cn.jiguang.common.resp.APIRequestException;
+import cn.jiguang.common.utils.StringUtils;
 import cn.jpush.api.JPushClient;
 import cn.jpush.api.push.PushResult;
 import cn.jpush.api.push.model.Options;
@@ -10,31 +11,32 @@ import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
 import cn.jpush.api.push.model.notification.AndroidNotification;
-import cn.jpush.api.push.model.notification.IosNotification;
 import cn.jpush.api.push.model.notification.Notification;
-import cn.jpush.api.push.model.notification.PlatformNotification;
-import com.soft863.pushmessge.config.*;
 import com.soft863.pushmessge.util.PlatfromNotificationUtil;
 import com.soft863.pushmessge.util.PushPayloadUtil;
-import com.soft863.pushmessge.util.PushMessageException;
-import com.sun.javafx.PlatformUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+/**
+ *  消息推送
+ *
+ * @ClassName PushMessage
+ * @Author
+ * @Date 2019/3/18 0018
+ */
 public class PushMessage {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PushMessage.class);
-    private static String appKey = "";
-    private static String masterSecret = "";
-    private static boolean production = true;
-    private static long timeToLive = 86400;
-    private static int sendno = 1;
-    private static int badge = 1;
-    private static String sound = "default";
+    private final Logger LOGGER = LoggerFactory.getLogger(PushMessage.class);
 
+    private String appKey = "";
+    private String masterSecret = "";
+    private boolean production = true;
+    private long timeToLive = 86400;
+    private int sendno = 1;
+    private int badge = 1;
+    private String sound = "default";
 
-    private static JPushClient jPushClient = null;
 
 
 
@@ -44,11 +46,13 @@ public class PushMessage {
      * @param aliasList   别名或别名组
      * @param msgContent 消息内容
      * @param extrasparam 扩展字段
-     * @return 0推送失败，1推送成功
+     * @return
      */
-    public static int pushMessage(JPushClient jPushClient, List<String> aliasList, String msgContent, String notificationTitle, String extraKey, String extrasparam) {
+    public int pushMessage(List<String> aliasList, String msgContent, String notificationTitle, String extraKey,
+                            String extrasparam) {
+        JPushClient jPushClient = new JPushClient(masterSecret,appKey);
         PushPayload pushPayload = pushMessageToAllPlatfromByAliasList(aliasList, notificationTitle, msgContent, extraKey, extrasparam);
-        return PushPayloadUtil.pushResult(jPushClient, pushPayload);
+        return PushPayloadUtil.pushResult(jPushClient, pushPayload, aliasList, notificationTitle, msgContent);
     }
 
     /**
@@ -56,11 +60,14 @@ public class PushMessage {
      *
      * @param msgContent 消息内容
      * @param extrasparam 扩展字段
-     * @return 0推送失败，1推送成功
+     * @return
      */
-    public static int sendToAll(JPushClient jPushClient, String msgContent, String notificationTitle, String extraKey, String extrasparam) {
+    public int pushMessageToAllPlatfrom(String msgContent, String notificationTitle, String extraKey,
+                                        String extrasparam) {
+        JPushClient jPushClient = new JPushClient(masterSecret,appKey);
         PushPayload pushPayload = pushMessageToAllPlatfromAll(msgContent, notificationTitle, extraKey, extrasparam);
-        return PushPayloadUtil.pushResult(jPushClient, pushPayload);
+        return PushPayloadUtil.pushResult(jPushClient, pushPayload,notificationTitle,msgContent);
+
     }
 
     /**
@@ -69,25 +76,76 @@ public class PushMessage {
      * @param tagsList    Tag或Tag组
      * @param msgContent 消息内容
      * @param extrasparam 扩展字段
-     * @return 0推送失败，1推送成功
+     * @return
      */
-    public static int sendToTagList(JPushClient jPushClient, List<String> tagsList, String msgContent, String extraKey
+    public int pushMessageToAllPlatformByTag(List<String> tagsList, String msgContent, String extraKey
             , String extrasparam, String notificationTitle) {
-        PushPayload pushPayload = pushMessageToAllPlatfromByTagList(tagsList, notificationTitle, msgContent, extraKey, extraKey);
-        return PushPayloadUtil.pushResult(jPushClient, pushPayload);
+        JPushClient jPushClient = new JPushClient(masterSecret,appKey);
+        PushPayload pushPayload = pushMessageToAllPlatfromByTagList(tagsList, notificationTitle, msgContent, extraKey, extrasparam);
+        return PushPayloadUtil.pushResult(jPushClient, pushPayload, tagsList,notificationTitle,msgContent);
     }
 
     /**
-     * 发送给所有安卓用户
+     * 发送给所有android用户
      *
      * @param notificationTitle 通知内容标题
      * @param msgContent        消息内容
      * @param extrasparam        扩展字段
-     * @return 0推送失败，1推送成功
+     * @return
      */
-    public static int sendToAllAndroid(JPushClient jPushClient, String msgContent, String notificationTitle, String extraKey, String extrasparam) {
-        PushPayload pushPayload = pushMessageToAndroidPlatfromAll(msgContent, notificationTitle, extraKey, extraKey);
-        return PushPayloadUtil.pushResult(jPushClient, pushPayload);
+    public int pushMessageToAndroidAll(String msgContent, String notificationTitle, String extraKey,
+                                      String extrasparam) {
+        JPushClient jPushClient = new JPushClient(masterSecret,appKey);
+        PushPayload pushPayload = PushPayload.newBuilder()
+                //指定要推送的平台，all代表当前应用配置了的所有平台，也可以传android等具体平台
+                .setPlatform(Platform.android())
+                //指定推送的接收对象，all代表所有人，也可以指定已经设置成功的tag或alias或该应应用客户端调用接口获取到的registration id
+                .setAudience(Audience.all())
+                //jpush的通知，android的由jpush直接下发，iOS的由apns服务器下发，Winphone的由mpns下发
+                .setNotification(Notification.newBuilder()
+                        //指定当前推送的android通知
+                        .addPlatformNotification(AndroidNotification.newBuilder()
+                                .setAlert(msgContent)
+                                .setTitle(notificationTitle)
+                                //此字段为透传字段，不会显示在通知栏。用户可以通过此字段来做一些定制需求，如特定的key传要指定跳转的页面（value）
+                                .addExtra(extraKey,extrasparam)
+                                .build())
+                        .build()
+                )
+                //Platform指定了哪些平台就会像指定平台中符合推送条件的设备进行推送。 jpush的自定义消息，
+                // sdk默认不做任何处理，不会有通知提示。建议看文档http://docs.jpush.io/guideline/faq/的
+                // [通知与自定义消息有什么区别？]了解通知和自定义消息的区别
+                /*.setMessage(Message.newBuilder()
+                        .setMsgContent(msg_content)
+                        .setTitle(msg_title)
+                        .addExtra("message extras key",extrasparam)
+                        .build())*/
+
+                .setOptions(Options.newBuilder()
+                        //此字段的值是用来指定本推送要推送的apns环境，false表示开发，true表示生产；对android和自定义消息无意义
+                        .setApnsProduction(false)
+                        //此字段是给开发者自己给推送编号，方便推送者分辨推送记录
+                        .setSendno(1)
+                        //此字段的值是用来指定本推送的离线保存时长，如果不传此字段则默认保存一天，最多指定保留十天，单位为秒
+                        .setTimeToLive(86400)
+                        .build())
+                .build();
+        PushResult pushResult= null;
+        try {
+            pushResult = jPushClient.sendPush(pushPayload);
+        } catch (APIConnectionException e) {
+            e.printStackTrace();
+        } catch (APIRequestException e) {
+            e.printStackTrace();
+        }
+        LOGGER.info(""+pushResult);
+//        if(pushResult.getResponseCode()==200){
+//            result=1;
+//        }
+//
+        return 0;
+//        PushPayload pushPayload = pushMessageToAndroidPlatfromAll(msgContent, notificationTitle, extraKey, extrasparam);
+//        return PushPayloadUtil.pushResult(jPushClient, pushPayload,notificationTitle,msgContent);
     }
 
     /**
@@ -97,9 +155,10 @@ public class PushMessage {
      * @param extrasparam 扩展字段
      * @return
      */
-    public static int pushMessageToAllIos(JPushClient jPushClient, String msgContent, String extraKey, String extrasparam) {
-        PushPayload pushPayload = pushMessageToIosPlatfromAll(msgContent, extraKey, extraKey);
-        return PushPayloadUtil.pushResult(jPushClient, pushPayload);
+    public int pushMessageToIosAll(String msgContent, String extraKey, String extrasparam) {
+        JPushClient jPushClient = new JPushClient(this.appKey,this.masterSecret);
+        PushPayload pushPayload = pushMessageToIosPlatfromAll(msgContent, extraKey, extrasparam);
+        return PushPayloadUtil.pushResult(jPushClient, pushPayload, msgContent);
     }
 
     /**
@@ -111,7 +170,8 @@ public class PushMessage {
      * @param extraValue         扩展内容
      * @return
      */
-    private static PushPayload pushMessageToAndroidPlatfromAll(String msgContent, String notificationTitle, String extraKey, String extraValue) {
+    private PushPayload pushMessageToAndroidPlatfromAll(String msgContent, String notificationTitle, String extraKey
+            , String extraValue) {
         LOGGER.info("==================向android平台所有用户推送消息中==================");
         // 获取推送对象
         PushPayload.Builder pushPayloadBuilder = PushPayload.newBuilder();
@@ -135,7 +195,7 @@ public class PushMessage {
      * @param extraValue  扩展字段内容
      * @return
      */
-    private static PushPayload pushMessageToIosPlatfromAll(String msgContent, String extraKey, String extraValue) {
+    private PushPayload pushMessageToIosPlatfromAll(String msgContent, String extraKey, String extraValue) {
         LOGGER.info("----------向ios平台所有用户推送消息中.......");
         // 获取推送对象
         PushPayload.Builder pushPayloadBuilder = PushPayload.newBuilder();
@@ -161,7 +221,8 @@ public class PushMessage {
      * @param extraValue
      * @return
      */
-    private static PushPayload pushMessageToAllPlatfromByTagList(List<String> tagsList, String notificationTitle, String msgContent,
+    private PushPayload pushMessageToAllPlatfromByTagList(List<String> tagsList, String notificationTitle,
+                                                           String msgContent,
                                                                  String extraKey, String extraValue) {
         LOGGER.info("----------向所有平台单个或多个指定Tag用户推送消息中.......");
 
@@ -188,7 +249,8 @@ public class PushMessage {
      * @param extraValue
      * @return
      */
-    private static PushPayload pushMessageToAllPlatfromAll(String msgContent, String notificationTitle, String extraKey, String extraValue) {
+    private PushPayload pushMessageToAllPlatfromAll(String msgContent, String notificationTitle, String extraKey,
+                                                     String extraValue) {
 
 
         LOGGER.info("----------向所有平台所有用户推送消息中......");
@@ -218,7 +280,8 @@ public class PushMessage {
      * @param extraValue
      * @return
      */
-    private static PushPayload pushMessageToAllPlatfromByAliasList(List<String> aliasList, String notificationTitle, String msgContent,
+    private PushPayload pushMessageToAllPlatfromByAliasList(List<String> aliasList, String notificationTitle,
+                                                                    String msgContent,
                                                                    String extraKey, String extraValue) {
 
         LOGGER.info("----------向所有平台单个或多个指定别名用户推送消息中......");
@@ -243,8 +306,8 @@ public class PushMessage {
      *
      * @param appKey
      */
-    public static void setAppKey(String appKey) {
-        PushMessage.appKey = appKey;
+    public void setAppKey(String appKey) {
+        this.appKey = appKey;
     }
 
     /**
@@ -252,8 +315,8 @@ public class PushMessage {
      *
      * @param masterSecret
      */
-    public static void setMasterSecret(String masterSecret) {
-        PushMessage.masterSecret = masterSecret;
+    public void setMasterSecret(String masterSecret) {
+        this.masterSecret = masterSecret;
     }
 
     /**
@@ -261,8 +324,8 @@ public class PushMessage {
      *
      * @param production
      */
-    public static void setProduction(boolean production) {
-        PushMessage.production = production;
+    public void setProduction(boolean production) {
+        this.production = production;
     }
 
     /**
@@ -270,8 +333,8 @@ public class PushMessage {
      *
      * @param timeToLive
      */
-    public static void setTimeToLive(long timeToLive) {
-        PushMessage.timeToLive = timeToLive;
+    public void setTimeToLive(long timeToLive) {
+        this.timeToLive = timeToLive;
     }
 
 }
