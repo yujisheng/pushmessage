@@ -6,7 +6,7 @@
 
     <groupId>com.soft863</groupId>
     <artifactId>push-message</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.6</version>
     <packaging>jar</packaging>
 
     <dependencies>

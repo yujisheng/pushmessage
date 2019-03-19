@@ -2,12 +2,11 @@ package com.soft863.pushmessge.config;
 
 /**
  * 推送结果
- *
- * @ClassName PushResult
+ * @ClassName SendPushResult
  * @Author
- * @Date 2019/3/18 0018
+ * @Date 2019/3/18
  */
-public class PushResult {
+public class SendPushResult {
     /**
      * 推送成功
      */
