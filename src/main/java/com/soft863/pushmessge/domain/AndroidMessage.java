@@ -9,27 +9,59 @@ import java.util.Map;
  * @Date 2019/3/19
  */
 public class AndroidMessage {
+    /**
+     * tag或者alias标识
+     */
     private List<String> tagsOrAlias;
+    /**
+     * 推送通知
+     */
     private String alter;
+    /**
+     * 推送主题
+     */
     private String title;
+    /**
+     * 推送消息的内容
+     */
+    private String msgContent;
+    /**
+     * 推送额外信息
+     */
     private Map<String,String> extras;
 
-    public AndroidMessage(List<String> tagsOrAlias, String alter, String title, Map<String, String> extras) {
+    public AndroidMessage(List<String> tagsOrAlias, String alter, String title, String msgContent, Map<String, String> extras) {
         this.tagsOrAlias = tagsOrAlias;
         this.alter = alter;
         this.title = title;
+        this.msgContent = msgContent;
         this.extras = extras;
     }
 
-    public AndroidMessage(String alter, String title, Map<String, String> extras) {
+    public AndroidMessage(String alter, String title, String msgContent) {
         this.alter = alter;
         this.title = title;
+        this.msgContent = msgContent;
+    }
+
+    public AndroidMessage(String alter, String title, String msgContent, Map<String, String> extras) {
+        this.alter = alter;
+        this.title = title;
+        this.msgContent = msgContent;
         this.extras = extras;
     }
 
     public AndroidMessage(String alter, String title) {
         this.alter = alter;
         this.title = title;
+    }
+
+    public String getMsgContent() {
+        return msgContent;
+    }
+
+    public void setMsgContent(String msgContent) {
+        this.msgContent = msgContent;
     }
 
     public List<String> getTagsOrAlias() {

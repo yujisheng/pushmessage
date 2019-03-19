@@ -7,9 +7,10 @@ import cn.jpush.api.push.PushResult;
 import cn.jpush.api.push.model.PushPayload;
 import com.soft863.pushmessge.config.HttpStatus;
 import com.soft863.pushmessge.config.SendPushResult;
+import com.soft863.pushmessge.domain.AllMessage;
 import com.soft863.pushmessge.domain.AndroidMessage;
 import com.soft863.pushmessge.domain.IosMessage;
-import com.soft863.pushmessge.util.PushPayloadUtill;
+import com.soft863.pushmessge.util.PushPayLoadUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ public class PushMessage {
     public int pushMessageToAndroidAll(AndroidMessage androidMessage) throws APIConnectionException, APIRequestException {
         JPushClient jPushClient = new JPushClient(masterSecret, appKey);
         // 推送结果
-        int result = sendPushMessage(jPushClient, PushPayloadUtill.pushMessageToAndroidAll(androidMessage, production, sendno, timeToLive));
+        int result = sendPushMessage(jPushClient, PushPayLoadUtil.pushMessageToAndroidAll(androidMessage, production, sendno, timeToLive));
         return  result;
     }
 
@@ -51,7 +52,7 @@ public class PushMessage {
     public int pushMessageToAndroidByTags(AndroidMessage androidMessage) throws APIConnectionException, APIRequestException {
         JPushClient jPushClient = new JPushClient(masterSecret, appKey);
         // 推送结果
-        int result = sendPushMessage(jPushClient, PushPayloadUtill.pushMessageToAndroidByTags(androidMessage, production, sendno, timeToLive));
+        int result = sendPushMessage(jPushClient, PushPayLoadUtil.pushMessageToAndroidByTags(androidMessage, production, sendno, timeToLive));
         return  result;
     }
 
@@ -63,7 +64,7 @@ public class PushMessage {
     public int pushMessageToAndroidByAlias(AndroidMessage androidMessag) throws APIConnectionException, APIRequestException {
         JPushClient jPushClient = new JPushClient(masterSecret, appKey);
         // 推送结果
-        int result = sendPushMessage(jPushClient, PushPayloadUtill.pushMessageToAndroidByAlias(androidMessag, production, sendno, timeToLive));
+        int result = sendPushMessage(jPushClient, PushPayLoadUtil.pushMessageToAndroidByAlias(androidMessag, production, sendno, timeToLive));
         return  result;
     }
 
@@ -74,7 +75,7 @@ public class PushMessage {
      */
     public int pushMessageToIosAll(IosMessage iosMessage) throws APIConnectionException, APIRequestException {
         JPushClient jPushClient = new JPushClient(masterSecret, appKey);
-        int result = sendPushMessage(jPushClient, PushPayloadUtill.pushMessageToIosAll(iosMessage, badge, sound, production, sendno, timeToLive));
+        int result = sendPushMessage(jPushClient, PushPayLoadUtil.pushMessageToIosAll(iosMessage, badge, sound, production, sendno, timeToLive));
         return result;
     }
 
@@ -85,7 +86,21 @@ public class PushMessage {
      */
     public int pushMessageToIosByTags(IosMessage iosMessage) throws APIConnectionException, APIRequestException {
         JPushClient jPushClient = new JPushClient(masterSecret, appKey);
-        int result = sendPushMessage(jPushClient, PushPayloadUtill.pushMessageToIosAllByTags(iosMessage, badge, sound, production, sendno, timeToLive));
+        int result = sendPushMessage(jPushClient, PushPayLoadUtil.pushMessageToIosAllByTags(iosMessage, badge, sound, production, sendno, timeToLive));
+        return result;
+    }
+
+    /**
+     * 向Android和ios的所有用户推送消息
+     * @param allMessage
+     * @return
+     * @throws APIConnectionException
+     * @throws APIRequestException
+     */
+    public int pushMessageAndroidAndIosAll(AllMessage allMessage) throws APIConnectionException, APIRequestException {
+        JPushClient jPushClient = new JPushClient(masterSecret,appKey);
+        int result = sendPushMessage(jPushClient, PushPayLoadUtil.pushMessageAndroidAndIosAll(allMessage, production,
+                sendno, timeToLive));
         return result;
     }
 
@@ -102,6 +117,7 @@ public class PushMessage {
             PushResult pushResult = jPushClient.sendPush(pushPayload);
             LOGGER.info("消息推送后" + pushResult);
             if (pushResult.getResponseCode() == HttpStatus.SUCCESS) {
+                LOGGER.info("============sendPushSuccess==========");
                 return SendPushResult.PUSH_SUCCESS;
             }
         return SendPushResult.PUSH_FAILURE;
