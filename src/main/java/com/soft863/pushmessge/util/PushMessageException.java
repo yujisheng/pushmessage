@@ -11,7 +11,7 @@ public class PushMessageException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     private String msg;
-    private int code = 11000;
+    private int code = 12000;
 
     public PushMessageException(String msg) {
         super(msg);

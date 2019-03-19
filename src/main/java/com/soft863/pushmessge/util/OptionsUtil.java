@@ -1,4 +1,4 @@
-package com.soft863.pushmessge.Util1;
+package com.soft863.pushmessge.util;
 
 import cn.jpush.api.push.model.Options;
 
